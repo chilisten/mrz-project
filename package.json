@@ -1,0 +1,13 @@
+{
+  "name": "mrz-reader-app",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "dependencies": {
+    "electron": "^28.0.0",
+    "mrz": "^3.5.0",
+    "tesseract.js": "^5.0.0"
+  }
+}
