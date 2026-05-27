@@ -1,70 +1,12 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <title>Авиа Бронирование: MRZ Сканер</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-<div class="container">
-    <div class="booking-form">
-        <h2>Бронирование Билета</h2>
-        <p>Введите данные вручную или загрузите фото паспорта.</p>
-        
-        <form id="passportForm">
-            <div class="form-group">
-                <label>Фамилия (Surname)</label>
-                <input type="text" id="surname" placeholder="IVANOV">
-            </div>
-            <div class="form-group">
-                <label>Имя (Given Names)</label>
-                <input type="text" id="names" placeholder="IVAN">
-            </div>
-            <div class="form-group">
-                <label>Номер паспорта</label>
-                <input type="text" id="docNum" placeholder="123456789">
-            </div>
-            <div class="form-group">
-                <label>Гражданство (Country Code)</label>
-                <input type="text" id="country" placeholder="RUS">
-            </div>
-            <div class="form-group">
-                <label>Дата рождения (YYMMDD)</label>
-                <input type="text" id="dob" placeholder="800101">
-            </div>
-            <div class="form-group">
-                <label>Дата истечения (YYMMDD)</label>
-                <input type="text" id="expiry" placeholder="250101">
-            </div>
-            <div class="form-group">
-                <label>Пол</label>
-                <input type="text" id="sex" placeholder="M/F">
-            </div>
-
-            <button type="submit" class="btn-submit">Забронировать</button>
-        </form>
-    </div>
-
-    <div class="scanner-section">
-        <h3>Скан Паспорта</h3>
-        <div class="upload-box">
-            <input type="file" id="fileInput" accept="image/*">
-            <p>Перетащите фото или нажмите для выбора</p>
-        </div>
-        
-        <div id="preview-container">
-            <img id="preview" src="" alt="Preview">
-        </div>
-
-        <div id="status">Ожидание загрузки...</div>
-        <div id="progress-bar"><div id="progress-fill"></div></div>
-        <button id="restart-btn" style="padding: 10px 20px; background-color: #28a745; color: white; border: none; cursor: pointer;">Сбросить и начать заново</button>
-    </div>
-</div>
-
-<script src="https://unpkg.com/tesseract.js@4.0.2/dist/tesseract.min.js"></script>
-
-<script src="renderer.js"></script>
-</body>
+<html lang="ru" class="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AirBook — MRZ Smart Booking</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
 </html>
