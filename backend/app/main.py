@@ -17,28 +17,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Применяем миграции при старте
-    try:
-        from alembic.config import Config
-        from alembic import command
-        import asyncio
-
-        alembic_cfg = Config("alembic.ini")
-        await asyncio.get_event_loop().run_in_executor(
-            None, command.upgrade, alembic_cfg, "head"
-        )
-        logger.info("✅ Migrations applied")
-    except Exception as e:
-        logger.error(f"❌ Migration failed: {e}")
-
-    # Проверка подключения к БД
     try:
         async with engine.begin() as conn:
             await conn.execute(text("SELECT 1"))
         logger.info("✅ Database connection OK")
     except Exception as e:
         logger.error(f"❌ Database connection failed: {e}")
-
     yield
     await engine.dispose()
     logger.info("Database pool closed")
