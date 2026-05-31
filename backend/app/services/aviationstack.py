@@ -150,8 +150,7 @@ ROUTES_DB = {
 
 
 async def search_flights(origin: str, destination: str, flight_date: str, limit: int = 20) -> list[dict]:
-    if not settings.AVIATIONSTACK_API_KEY:
-        return _demo_flights(origin, destination, flight_date)
+    return _demo_flights(origin, destination, flight_date)
 
     try:
         params = {
@@ -247,13 +246,11 @@ def _demo_flights(origin: str, destination: str, date: str) -> list[dict]:
 
     result = []
     for airline, code, num, dep, arr, dur, aircraft, stops, first_price in template_list:
-        eco_seats = random.randint(5, 50)
-        bus_seats = random.randint(1, 10)
-        flight_prices = {
-            "economy":  prices.get("economy"),
-            "business": prices.get("business"),
-            "first":    first_price,
-        }
+        seed = int(hashlib.md5(f"{code}{num}{origin}{destination}".encode()).hexdigest(), 16)
+        eco_seats   = 10 + (seed % 35)
+        bus_seats   = 2  + (seed // 37 % 8)
+        first_seats = (2 + seed // 91 % 4) if first_price else 0
+
         result.append({
             "id": f"{code}{num}_{date}",
             "airline": airline,
@@ -265,8 +262,16 @@ def _demo_flights(origin: str, destination: str, date: str) -> list[dict]:
             "arrival":   arr,
             "duration":  dur,
             "date": date,
-            "prices": flight_prices,
-            "availableSeats": {"economy": eco_seats, "business": bus_seats, "first": 0 if not first_price else random.randint(1,4)},
+            "prices": {
+                "economy":  prices.get("economy"),
+                "business": prices.get("business"),
+                "first":    first_price,
+            },
+            "availableSeats": {
+                "economy":  eco_seats,
+                "business": bus_seats,
+                "first":    first_seats,
+            },
             "stops": stops,
             "aircraft": aircraft,
             "status": "scheduled",
@@ -297,7 +302,7 @@ def generate_seatmap(flight_data: dict) -> dict:
             {
                 "id": f"{row_num}{c}",
                 "col": c,
-                "taken": seeded_random(seat_num := seat_num + 1, 0.3),
+                "taken": False,
                 "class": "business",
                 "price": flight_data.get("prices", {}).get("business")
             }
@@ -310,7 +315,7 @@ def generate_seatmap(flight_data: dict) -> dict:
             {
                 "id": f"{row_num}{c}",
                 "col": c,
-                "taken": seeded_random(seat_num := seat_num + 1, 0.55),
+                "taken": False,
                 "class": "economy",
                 "price": flight_data.get("prices", {}).get("economy")
             }

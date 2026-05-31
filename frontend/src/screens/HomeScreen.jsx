@@ -12,12 +12,21 @@ export default function HomeScreen({ onSelectFlight }) {
   const [filterClass, setFilterClass] = useState('all')
   const [filterDirect, setFilterDirect] = useState(false)
   const [sortBy, setSortBy] = useState('price')
+  const [selectedDate, setSelectedDate] = useState(() => {
+    const d = new Date()
+    return d.toISOString().split('T')[0]
+  })
 
   useEffect(() => {
+    setLoading(true)
     flightsApi.all()
-      .then(res => { setFlights(res.data || []); setLoading(false) })
+      .then(res => {
+        const all = res.data || []
+        setFlights(all.map(f => ({ ...f, date: selectedDate })))
+        setLoading(false)
+      })
       .catch(() => { setFlights([]); setLoading(false) })
-  }, [])
+  }, [selectedDate])
 
   const filtered = useMemo(() => {
     let list = [...flights]
@@ -94,6 +103,22 @@ export default function HomeScreen({ onSelectFlight }) {
         </p>
       </div>
 
+      {/* Date picker */}
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-sm font-semibold" style={{ color: textMuted }}>📅 Дата:</span>
+        <input
+          type="date"
+          value={selectedDate}
+          min={new Date().toISOString().split('T')[0]}
+          onChange={e => setSelectedDate(e.target.value)}
+          className="rounded-xl px-3 py-2 text-sm outline-none transition-all"
+          style={{
+            background: isLight ? '#fff' : 'rgba(15,23,42,0.70)',
+            border: `1px solid ${isLight ? '#cbd5e1' : 'rgba(51,65,85,0.80)'}`,
+            color: textPrimary,
+          }}
+        />
+      </div>
       {/* Search */}
       <div className="relative mb-4">
         <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style={{ color: textMuted }}>🔍</span>
@@ -258,9 +283,6 @@ export default function HomeScreen({ onSelectFlight }) {
                 {/* Footer */}
                 <div className="flex items-center justify-between pt-3" style={{ borderTop: `1px solid ${divider}` }}>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-semibold" style={{ color: seatsColor(availableTotal) }}>
-                      {availableTotal} {tr.seats}
-                    </span>
                     <span className="text-xs" style={{ color: textMuted }}>{flight.aircraft}</span>
                   </div>
                   <div

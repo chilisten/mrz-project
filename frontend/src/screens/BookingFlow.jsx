@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { flightsApi } from '../services/api'
 import { useApp } from '../context/AppContext'
 import SeatMap from '../components/SeatMap'
 import PassportScanner from '../components/PassportScanner'
@@ -129,6 +130,7 @@ export default function BookingFlow({ flight, onBack, onComplete }) {
   const [seatAssignments, setSeatAssignments] = useState({})
   const [seatObjects, setSeatObjects] = useState({})
   const [pickerFor, setPickerFor] = useState(null)
+  const [availableSeats, setAvailableSeats] = useState(flight.availableSeats)
 
   const text   = isLight ? '#0f172a' : '#f1f5f9'
   const muted  = isLight ? '#64748b' : '#94a3b8'
@@ -138,6 +140,30 @@ export default function BookingFlow({ flight, onBack, onComplete }) {
   const rowBg  = isLight ? '#f8faff' : 'rgba(15,23,42,0.60)'
   const rowBd  = isLight ? '#e2e8f0' : 'rgba(51,65,85,0.70)'
 
+  useEffect(() => {
+    const qs = new URLSearchParams()
+    if (flight.aircraft) qs.set('aircraft', flight.aircraft)
+    if (flight.prices?.economy) qs.set('economy_price', flight.prices.economy)
+    if (flight.prices?.business) qs.set('business_price', flight.prices.business)
+    if (flight.prices?.first) qs.set('first_price', flight.prices.first)
+
+    flightsApi.seatmap(flight.id, qs.toString()).then(res => {
+      if (!res?.data?.rows) return
+      const rows = res.data.rows
+      let eco = 0, bus = 0, fst = 0
+      rows.forEach(row => {
+        row.cols.forEach(col => {
+          if (!col.taken) {
+            if (col.class === 'economy') eco++
+            else if (col.class === 'business') bus++
+            else if (col.class === 'first') fst++
+          }
+        })
+      })
+      setAvailableSeats({ economy: eco, business: bus, first: fst })
+    }).catch(() => {})
+  }, [flight.id])
+  
   const addPassenger = () => { if (passengers.length < 5) setPassengers(p => [...p, { passport: null }]) }
   const removePassenger = (idx) => {
     setPassengers(p => p.filter((_, i) => i !== idx))
@@ -205,6 +231,9 @@ export default function BookingFlow({ flight, onBack, onComplete }) {
         <div className="flex-1">
           <p className="font-bold text-sm" style={{ color: text }}>{flight.from.code} → {flight.to.code}</p>
           <p className="text-xs" style={{ color: muted }}>{flight.airline} · {flight.code} · {flight.departure}</p>
+          <p className="text-xs mt-0.5" style={{ color: '#4ade80' }}>
+            💺 {tr.filterEconomy}: {availableSeats.economy} · {tr.filterBusiness}: {availableSeats.business}
+          </p>
         </div>
         <button onClick={onBack} className="btn-ghost text-sm py-1.5 px-3">← {tr.back}</button>
       </div>
