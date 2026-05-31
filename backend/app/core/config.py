@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: str = "http://localhost:5173"
 
     AVIATIONSTACK_API_KEY: str = ""
-    AVIATIONSTACK_BASE_URL: str = "https://api.aviationstack.com/v1"
+    AVIATIONSTACK_BASE_URL: str = "http://api.aviationstack.com/v1"
 
     def get_cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
