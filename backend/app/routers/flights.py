@@ -136,3 +136,33 @@ async def seatmap(
     except Exception as e:
         logger.error(f"Seatmap failed for {flight_id}: {e}")
         raise HTTPException(status_code=502, detail=str(e))
+@router.get("/debug-api")
+async def debug_api():
+    """Диагностика — покажет что реально возвращает AviationStack"""
+    import httpx
+    from app.core.config import settings
+    
+    result = {
+        "api_key_set": bool(settings.AVIATIONSTACK_API_KEY),
+        "api_key_preview": settings.AVIATIONSTACK_API_KEY[:8] + "..." if settings.AVIATIONSTACK_API_KEY else "EMPTY",
+        "base_url": settings.AVIATIONSTACK_BASE_URL,
+    }
+    
+    try:
+        params = {
+            "access_key": settings.AVIATIONSTACK_API_KEY,
+            "dep_iata": "FRU",
+            "arr_iata": "SVO",
+            "limit": 3,
+        }
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(
+                f"{settings.AVIATIONSTACK_BASE_URL}/flights",
+                params=params, timeout=15,
+            )
+        result["status_code"] = resp.status_code
+        result["response"] = resp.json()
+    except Exception as e:
+        result["error"] = str(e)
+    
+    return result
